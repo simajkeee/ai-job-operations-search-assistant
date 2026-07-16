@@ -5,7 +5,7 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from app.infrastructure.database import Base
+from app.auth.persistence import UserModel
 from app.infrastructure.settings import get_settings
 
 # this is the Alembic Config object, which provides
@@ -24,7 +24,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = Base.metadata
+target_metadata = UserModel.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

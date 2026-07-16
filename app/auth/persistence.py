@@ -1,11 +1,14 @@
 from datetime import datetime
 from uuid import UUID, uuid4
 
+from psycopg.errors import UniqueViolation
 from sqlalchemy import String, DateTime, func
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Mapped, mapped_column, Session
 from sqlalchemy.dialects.postgresql import UUID as PostgreSQLUUID
 
 from app.auth.domain import User
+from app.auth.errors import EmailAlreadyRegisteredError
 from app.auth.repository import UserRepository
 from app.infrastructure.database import Base
 
@@ -35,7 +38,7 @@ class UserModel(Base):
 
 
 class SqlAlchemyUserRepository:
-    def __init__(self, session: Session):
+    def __init__(self, session: Session) -> None:
         self._session = session
 
     def create(self, email: str, password_hash: str) -> User:
@@ -45,13 +48,23 @@ class SqlAlchemyUserRepository:
         )
 
         self._session.add(user)
-        self._session.flush()
 
-        return User(user.id, user.email, user.created_at)
+        try:
+            self._session.flush()
+        except IntegrityError as error:
+            if isinstance(error.orig, UniqueViolation):
+                raise EmailAlreadyRegisteredError() from error
+            raise
+
+        return User(
+            id=user.id,
+            email=user.email,
+            created_at=user.created_at,
+        )
 
 
 class SqlAlchemyUnitOfWork:
-    def __init__(self, session: Session):
+    def __init__(self, session: Session) -> None:
         self._session = session
         self._users = SqlAlchemyUserRepository(self._session)
 

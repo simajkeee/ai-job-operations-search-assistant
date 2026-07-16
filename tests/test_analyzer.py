@@ -1,4 +1,4 @@
-from analyzer import FakeVacancyAnalyzer
+from tests.fakes import FakeVacancyAnalyzer
 from schemas import VacancyAnalyzeRequest, Decision
 
 

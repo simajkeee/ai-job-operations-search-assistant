@@ -6,6 +6,7 @@ from sqlalchemy.orm import Mapped, mapped_column, Session
 from sqlalchemy.dialects.postgresql import UUID as PostgreSQLUUID
 
 from app.auth.domain import User
+from app.auth.repository import UserRepository
 from app.infrastructure.database import Base
 
 
@@ -47,3 +48,19 @@ class SqlAlchemyUserRepository:
         self._session.flush()
 
         return User(user.id, user.email, user.created_at)
+
+
+class SqlAlchemyUnitOfWork:
+    def __init__(self, session: Session):
+        self._session = session
+        self._users = SqlAlchemyUserRepository(self._session)
+
+    @property
+    def users(self) -> UserRepository:
+        return self._users
+
+    def commit(self) -> None:
+        self._session.commit()
+
+    def rollback(self) -> None:
+        self._session.rollback()

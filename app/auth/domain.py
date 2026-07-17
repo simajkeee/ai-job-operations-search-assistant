@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime
 from uuid import UUID
 
@@ -7,4 +7,5 @@ from uuid import UUID
 class User:
     id: UUID
     email: str
+    password_hash: str = field(repr=False)
     created_at: datetime

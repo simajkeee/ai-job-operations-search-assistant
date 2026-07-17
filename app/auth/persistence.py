@@ -2,7 +2,7 @@ from datetime import datetime
 from uuid import UUID, uuid4
 
 from psycopg.errors import UniqueViolation
-from sqlalchemy import String, DateTime, func
+from sqlalchemy import String, DateTime, func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Mapped, mapped_column, Session
 from sqlalchemy.dialects.postgresql import UUID as PostgreSQLUUID
@@ -59,6 +59,21 @@ class SqlAlchemyUserRepository:
         return User(
             id=user.id,
             email=user.email,
+            password_hash=user.password_hash,
+            created_at=user.created_at,
+        )
+
+    def get_by_email(self, email: str) -> User | None:
+        statement = select(UserModel).where(UserModel.email == email)
+        user: UserModel | None = self._session.scalars(statement).one_or_none()
+
+        if user is None:
+            return None
+
+        return User(
+            id=user.id,
+            email=user.email,
+            password_hash=user.password_hash,
             created_at=user.created_at,
         )
 

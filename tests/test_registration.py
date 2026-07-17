@@ -24,6 +24,7 @@ def test_registration_creates_user_with_hashed_password() -> None:
     user = User(
         id=uuid4(),
         email=email,
+        password_hash=password_hash,
         created_at=datetime.now(timezone.utc),
     )
     unit_of_work_mock.users.create.return_value = user

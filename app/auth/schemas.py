@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Literal
 from uuid import UUID
 
 from pydantic import EmailStr, BaseModel, Field
@@ -14,3 +14,8 @@ class RegisterUserResponse(BaseModel):
     id: UUID
     email: EmailStr
     created_at: datetime
+
+
+class AccessTokenResponse(BaseModel):
+    access_token: str
+    token_type: Literal["bearer"] = "bearer"

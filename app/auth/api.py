@@ -1,11 +1,19 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 
-from app.auth.dependencies import get_register_user
-from app.auth.errors import EmailAlreadyRegisteredError
+from app.auth.dependencies import get_register_user, get_login_user
+from app.auth.errors import EmailAlreadyRegisteredError, InvalidCredentialsError
+from app.auth.login import LoginUser
 from app.auth.registration import RegisterUser
-from app.auth.schemas import RegisterUserRequest, RegisterUserResponse
+from app.auth.schemas import (
+    RegisterUserRequest,
+    RegisterUserResponse,
+    AccessTokenResponse,
+)
+from app.auth.tokens import create_access_token
+from app.infrastructure.settings import Settings, get_settings
 
 router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
 
@@ -34,4 +42,27 @@ def register(
         id=user.id,
         email=user.email,
         created_at=user.created_at,
+    )
+
+
+@router.post("/token", response_model=AccessTokenResponse)
+def login(
+    form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
+    login_user: Annotated[LoginUser, Depends(get_login_user)],
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> AccessTokenResponse:
+    try:
+        user = login_user.execute(
+            email=form_data.username,
+            password=form_data.password,
+        )
+    except InvalidCredentialsError as error:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid credentials",
+            headers={"WWW-Authenticate": "Bearer"},
+        ) from error
+
+    return AccessTokenResponse(
+        access_token=create_access_token(user.id, settings),
     )

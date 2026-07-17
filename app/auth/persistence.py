@@ -56,12 +56,7 @@ class SqlAlchemyUserRepository:
                 raise EmailAlreadyRegisteredError() from error
             raise
 
-        return User(
-            id=user.id,
-            email=user.email,
-            password_hash=user.password_hash,
-            created_at=user.created_at,
-        )
+        return self._to_domain_user(user)
 
     def get_by_email(self, email: str) -> User | None:
         statement = select(UserModel).where(UserModel.email == email)
@@ -70,6 +65,19 @@ class SqlAlchemyUserRepository:
         if user is None:
             return None
 
+        return self._to_domain_user(user)
+
+    def get_by_id(self, user_id: UUID) -> User | None:
+        statement = select(UserModel).where(UserModel.id == user_id)
+        user: UserModel | None = self._session.scalars(statement).one_or_none()
+
+        if user is None:
+            return None
+
+        return self._to_domain_user(user)
+
+    @staticmethod
+    def _to_domain_user(user: UserModel) -> User:
         return User(
             id=user.id,
             email=user.email,

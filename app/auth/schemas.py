@@ -19,3 +19,9 @@ class RegisterUserResponse(BaseModel):
 class AccessTokenResponse(BaseModel):
     access_token: str
     token_type: Literal["bearer"] = "bearer"
+
+
+class UserResponse(BaseModel):
+    id: UUID
+    email: EmailStr
+    created_at: datetime

@@ -3,7 +3,8 @@ from typing import Annotated
 from fastapi import APIRouter, Depends, status, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
-from app.auth.dependencies import get_register_user, get_login_user
+from app.auth.dependencies import get_register_user, get_login_user, get_current_user
+from app.auth.domain import User
 from app.auth.errors import EmailAlreadyRegisteredError, InvalidCredentialsError
 from app.auth.login import LoginUser
 from app.auth.registration import RegisterUser
@@ -11,15 +12,16 @@ from app.auth.schemas import (
     RegisterUserRequest,
     RegisterUserResponse,
     AccessTokenResponse,
+    UserResponse,
 )
 from app.auth.tokens import create_access_token
 from app.infrastructure.settings import Settings, get_settings
 
-router = APIRouter(prefix="/api/v1/auth", tags=["auth"])
+router = APIRouter(prefix="/api/v1", tags=["auth"])
 
 
 @router.post(
-    "/register",
+    "/auth/register",
     response_model=RegisterUserResponse,
     status_code=status.HTTP_201_CREATED,
 )
@@ -45,7 +47,7 @@ def register(
     )
 
 
-@router.post("/token", response_model=AccessTokenResponse)
+@router.post("/auth/token", response_model=AccessTokenResponse)
 def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     login_user: Annotated[LoginUser, Depends(get_login_user)],
@@ -65,4 +67,13 @@ def login(
 
     return AccessTokenResponse(
         access_token=create_access_token(user.id, settings),
+    )
+
+
+@router.get("/me", response_model=UserResponse)
+def get_me(current_user: Annotated[User, Depends(get_current_user)]) -> UserResponse:
+    return UserResponse(
+        id=current_user.id,
+        email=current_user.email,
+        created_at=current_user.created_at,
     )

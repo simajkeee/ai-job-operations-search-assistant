@@ -1,35 +1,20 @@
-import os
-from typing import Annotated
-
-from fastapi import FastAPI, Depends
-from openai import OpenAI
-
-from analyzer import VacancyAnalyzer, OpenAIVacancyAnalyzer
-from app.auth.dependencies import get_current_user
-from app.auth.domain import User
-from schemas import VacancyAnalyzeRequest, VacancyAnalyzeResponse
+from fastapi import FastAPI, APIRouter
 
 from app.auth.api import router as auth_router
 from app.job_preferences.api import router as job_preferences_router
+from app.vacancies.api import router as vacancies_router
 
-app = FastAPI()
-app.include_router(auth_router)
-app.include_router(job_preferences_router)
+app = FastAPI(prefix="/api/v1")
 
+api_v1_router = APIRouter(prefix="/api/v1")
+api_v1_router.include_router(auth_router)
+api_v1_router.include_router(job_preferences_router)
 
-def get_vacancy_analyzer() -> VacancyAnalyzer:
-    return OpenAIVacancyAnalyzer(OpenAI(api_key=os.getenv("OPENAI_API_KEY")))
+api_v1_router.include_router(vacancies_router)
+
+app.include_router(api_v1_router)
 
 
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok"}
-
-
-@app.post("/api/v1/vacancies/analyze", response_model=VacancyAnalyzeResponse)
-def analyze_vacancy(
-    vacancy_analyze_request: VacancyAnalyzeRequest,
-    vacancy_analyzer: Annotated[VacancyAnalyzer, Depends(get_vacancy_analyzer)],
-    current_user: Annotated[User, Depends(get_current_user)],
-) -> VacancyAnalyzeResponse:
-    return vacancy_analyzer.analyze(vacancy_analyze_request)

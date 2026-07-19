@@ -15,7 +15,7 @@ from app.job_preferences.schemas import (
     ReplaceJobPreferencesRequest,
 )
 
-router = APIRouter(prefix="/api/v1/job-preferences", tags=["job-preferences"])
+router = APIRouter(prefix="/job-preferences", tags=["job-preferences"])
 
 
 @router.get("", response_model=list[JobPreferenceResponse])

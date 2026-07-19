@@ -17,11 +17,11 @@ from app.auth.schemas import (
 from app.auth.tokens import create_access_token
 from app.infrastructure.settings import Settings, get_settings
 
-router = APIRouter(prefix="/api/v1", tags=["auth"])
+router = APIRouter(prefix="/auth", tags=["auth"])
 
 
 @router.post(
-    "/auth/register",
+    "/register",
     response_model=RegisterUserResponse,
     status_code=status.HTTP_201_CREATED,
 )
@@ -47,7 +47,7 @@ def register(
     )
 
 
-@router.post("/auth/token", response_model=AccessTokenResponse)
+@router.post("/token", response_model=AccessTokenResponse)
 def login(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     login_user: Annotated[LoginUser, Depends(get_login_user)],

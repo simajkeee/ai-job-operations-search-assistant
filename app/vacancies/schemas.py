@@ -1,14 +1,16 @@
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 from enum import Enum
 
 from app.job_preferences.domain import WorkMode
 
 
 class VacancyAnalyzeRequest(BaseModel):
-    vacancy_title: str
-    vacancy_text: str
+    model_config = ConfigDict(str_strip_whitespace=True)
+
+    vacancy_title: str = Field(min_length=1)
+    vacancy_text: str = Field(min_length=1)
 
 
 class Decision(Enum):

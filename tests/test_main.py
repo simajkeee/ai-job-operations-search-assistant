@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from typing import Generator
+from unittest.mock import Mock
 from uuid import uuid4
 
 import pytest
@@ -7,8 +8,10 @@ from fastapi.testclient import TestClient
 
 from app.auth.dependencies import get_current_user
 from app.auth.domain import User
-from main import app, get_vacancy_analyzer
-from tests.fakes import FakeVacancyAnalyzer
+from app.vacancies.analyze import AnalyzeVacancy
+from app.vacancies.dependencies import get_analyze_vacancy
+from app.vacancies.schemas import VacancyAnalyzeResponse, Decision, RoleMatch
+from main import app
 
 
 @pytest.fixture
@@ -20,14 +23,29 @@ def client() -> Generator[TestClient, None, None]:
         created_at=datetime.now(timezone.utc),
     )
 
-    app.dependency_overrides[get_vacancy_analyzer] = lambda: FakeVacancyAnalyzer()
+    analyze_vacancy = Mock(spec=AnalyzeVacancy)
+    analyze_vacancy.execute.return_value = VacancyAnalyzeResponse(
+        decision=Decision.SKIP,
+        recommended_resume=None,
+        matched_job_preference_id=None,
+        interpreted_role=None,
+        role_match=RoleMatch.NONE,
+        role_evidence=[],
+        matched_keywords=[],
+        unmatched_preference_keywords=[],
+        detected_work_modes=[],
+        work_mode_match=None,
+        critical_gaps=[],
+        reasoning="Fake analysis result.",
+    )
+    app.dependency_overrides[get_analyze_vacancy] = lambda: analyze_vacancy
     app.dependency_overrides[get_current_user] = lambda: authenticated_user
 
     try:
         with TestClient(app) as test_client:
             yield test_client
     finally:
-        app.dependency_overrides.pop(get_vacancy_analyzer, None)
+        app.dependency_overrides.pop(get_analyze_vacancy, None)
         app.dependency_overrides.pop(get_current_user, None)
 
 

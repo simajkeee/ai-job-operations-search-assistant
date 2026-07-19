@@ -8,7 +8,7 @@ from app.auth.domain import User
 from app.auth.errors import EmailAlreadyRegisteredError
 from app.auth.passwords import PasswordHasher
 from app.auth.registration import RegisterUser
-from app.auth.repository import UserRepository
+from app.auth.persistence import UserRepository
 from app.auth.unit_of_work import UnitOfWork
 
 

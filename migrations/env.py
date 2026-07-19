@@ -5,8 +5,11 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from app.auth.persistence import UserModel
+from app.infrastructure.database import Base
 from app.infrastructure.settings import get_settings
+
+from app.auth.persistence import UserModel  # noqa: F401 - register model metadata
+from app.job_preferences.persistence import JobPreferenceModel  # noqa: F401 - register model metadata
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -24,7 +27,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = UserModel.metadata
+target_metadata = Base.metadata
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

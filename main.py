@@ -10,9 +10,11 @@ from app.auth.domain import User
 from schemas import VacancyAnalyzeRequest, VacancyAnalyzeResponse
 
 from app.auth.api import router as auth_router
+from app.job_preferences.api import router as job_preferences_router
 
 app = FastAPI()
 app.include_router(auth_router)
+app.include_router(job_preferences_router)
 
 
 def get_vacancy_analyzer() -> VacancyAnalyzer:

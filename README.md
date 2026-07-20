@@ -143,7 +143,7 @@ saved job preference.
 
 ## Verification
 
-Run backend linting, type checking, and tests from the repository root:
+Run backend and frontend checks from the repository root:
 
 ```bash
 make check

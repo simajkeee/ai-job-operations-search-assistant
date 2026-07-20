@@ -1,4 +1,4 @@
-import { request } from '../../shared/api/httpClient.ts'
+import { request } from "../../shared/api/httpClient.ts";
 
 import type {
   AccessTokenResponse,

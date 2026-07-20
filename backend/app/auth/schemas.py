@@ -7,7 +7,7 @@ from pydantic import EmailStr, BaseModel, Field
 
 class RegisterUserRequest(BaseModel):
     email: EmailStr
-    password: Annotated[str, Field(min_length=15, max_length=128)]
+    password: Annotated[str, Field(min_length=8, max_length=128)]
 
 
 class RegisterUserResponse(BaseModel):
